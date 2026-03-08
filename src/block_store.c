@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "bitmap.h"
 #include "block_store.h"
@@ -10,14 +11,34 @@
 // remove it before you submit. Just allows things to compile initially.
 #define UNUSED(x) (void)(x)
 
-struct block_store_t {
+struct block_store {
     uint8_t  data[BLOCK_STORE_NUM_BLOCKS][BLOCK_SIZE_BYTES];
     bitmap_t *bitmap;
 };
 
 block_store_t *block_store_create()
 {
-	return NULL;
+	block_store_t* block = malloc(sizeof(block_store_t));
+	if (block == NULL) return NULL;
+
+	block = memset(block, 0, sizeof(block_store_t));
+
+	block->bitmap = bitmap_overlay(BITMAP_SIZE_BYTES, block->data[BITMAP_START_BLOCK]);
+	if (block->bitmap == NULL) {
+		free(block);
+		return NULL;
+	}
+
+	size_t bitmap_blocks = (BITMAP_SIZE_BYTES + BLOCK_SIZE_BYTES - 1) / BLOCK_SIZE_BYTES;
+
+	for (size_t i = 0; i < bitmap_blocks; i++){
+		if (!block_store_request(block, BITMAP_START_BLOCK + i)) {
+			free(block);
+			return NULL;
+		}
+	}
+
+	return block;
 }
 
 void block_store_destroy(block_store_t *const bs)

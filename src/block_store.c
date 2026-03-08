@@ -23,7 +23,7 @@ block_store_t *block_store_create()
 
 	block = memset(block, 0, sizeof(block_store_t));
 
-	block->bitmap = bitmap_overlay(BITMAP_SIZE_BYTES, block->data[BITMAP_START_BLOCK]);
+	block->bitmap = bitmap_overlay(BITMAP_SIZE_BITS, block->data[BITMAP_START_BLOCK]);
 	if (block->bitmap == NULL) {
 		free(block);
 		return NULL;
@@ -43,7 +43,13 @@ block_store_t *block_store_create()
 
 void block_store_destroy(block_store_t *const bs)
 {
-	UNUSED(bs);
+	//null checks first, if exists -> destroy bitmap via prebuilt function and free struct memory
+	if(bs){
+		if(bs->bitmap){
+			bitmap_destroy(bs->bitmap);
+		}
+		free(bs);
+	}
 }
 
 size_t block_store_allocate(block_store_t *const bs)
@@ -54,9 +60,19 @@ size_t block_store_allocate(block_store_t *const bs)
 
 bool block_store_request(block_store_t *const bs, const size_t block_id)
 {
-	UNUSED(bs);
-	UNUSED(block_id);
-	return false;
+	//null check and validate that block id is within range
+	if(bs == NULL || block_id >= BLOCK_STORE_NUM_BLOCKS) {
+		return false;
+	}
+
+	//check if the requested block is already marked as used in the bitmap
+	if(bitmap_test(bs->bitmap, block_id)) {
+		return false;
+	}
+
+	//mark the block as used in the bitmap
+	bitmap_set(bs->bitmap, block_id);
+	return true;
 }
 
 void block_store_release(block_store_t *const bs, const size_t block_id)

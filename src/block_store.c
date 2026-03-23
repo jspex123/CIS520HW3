@@ -33,6 +33,7 @@ block_store_t *block_store_create()
 
 	for (size_t i = 0; i < bitmap_blocks; i++){
 		if (!block_store_request(block, BITMAP_START_BLOCK + i)) {
+			bitmap_destroy(block->bitmap);
 			free(block);
 			return NULL;
 		}

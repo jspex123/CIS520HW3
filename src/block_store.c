@@ -33,6 +33,7 @@ block_store_t *block_store_create()
 
 	for (size_t i = 0; i < bitmap_blocks; i++){
 		if (!block_store_request(block, BITMAP_START_BLOCK + i)) {
+			bitmap_destroy(block->bitmap);
 			free(block);
 			return NULL;
 		}
@@ -103,8 +104,17 @@ bool block_store_request(block_store_t *const bs, const size_t block_id)
 
 void block_store_release(block_store_t *const bs, const size_t block_id)
 {
-	UNUSED(bs);
-	UNUSED(block_id);
+	if (bs == NULL || block_id >= BLOCK_STORE_NUM_BLOCKS) {
+        return;
+    }
+
+	size_t bitmap_start = BITMAP_START_BLOCK;
+    size_t bitmap_end   = BITMAP_START_BLOCK + BITMAP_NUM_BLOCKS;
+    if (block_id >= bitmap_start && block_id < bitmap_end) {
+        return;
+    }
+
+    bitmap_reset(bs->bitmap, block_id);
 }
 
 size_t block_store_get_used_blocks(const block_store_t *const bs)

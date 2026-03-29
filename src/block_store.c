@@ -126,8 +126,11 @@ size_t block_store_get_used_blocks(const block_store_t *const bs)
 
 size_t block_store_get_free_blocks(const block_store_t *const bs)
 {
-	UNUSED(bs);
-	return 0;
+	if (bs == NULL) {
+        return SIZE_MAX;
+    }
+
+    return BLOCK_STORE_NUM_BLOCKS - bitmap_total_set(bs->bitmap);
 }
 
 size_t block_store_get_total_blocks()

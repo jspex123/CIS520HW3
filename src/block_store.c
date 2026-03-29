@@ -140,10 +140,19 @@ size_t block_store_get_total_blocks()
 
 size_t block_store_read(const block_store_t *const bs, const size_t block_id, void *buffer)
 {
-	UNUSED(bs);
-	UNUSED(block_id);
-	UNUSED(buffer);
-	return 0;
+	//NULL check and verifies that block_id is in valid range
+	if(bs == NULL || buffer == NULL || block_id >= BLOCK_STORE_NUM_BLOCKS){
+		return 0;
+	}
+
+	//verifies that the requested block is currently allocated
+	if(!bitmap_test(bs->bitmap, block_id)){
+		return 0;
+	}
+	
+	//copy one full block from block store into buffer
+	memcpy(buffer, bs->data[block_id], BLOCK_SIZE_BYTES);
+	return BLOCK_SIZE_BYTES;
 }
 
 size_t block_store_write(block_store_t *const bs, const size_t block_id, const void *buffer)

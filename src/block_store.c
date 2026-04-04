@@ -16,6 +16,10 @@ struct block_store {
     bitmap_t *bitmap;
 };
 
+/**
+ * Creates the block_store_t object, allocating its memory
+ * @returns the address for the block_store_t object, if fails NULL
+ */
 block_store_t *block_store_create()
 {
 	// allocate memory for the block_store
@@ -123,6 +127,10 @@ void block_store_release(block_store_t *const bs, const size_t block_id)
     bitmap_reset(bs->bitmap, block_id);
 }
 
+/**
+ * Gets the total number of used blocks in the block_store_t object
+ * @returns the number of used blocks, on fail SIZE_MAX
+ */
 size_t block_store_get_used_blocks(const block_store_t *const bs)
 {
 	// NULL check for valid block store object
@@ -140,7 +148,9 @@ size_t block_store_get_free_blocks(const block_store_t *const bs)
 
     return BLOCK_STORE_NUM_BLOCKS - bitmap_total_set(bs->bitmap);
 }
-
+/**
+ * @returns The total number of blocks in the block_store_t object
+ */
 size_t block_store_get_total_blocks()
 {
 	// returning the number of blocks
@@ -164,6 +174,10 @@ size_t block_store_read(const block_store_t *const bs, const size_t block_id, vo
 	return BLOCK_SIZE_BYTES;
 }
 
+/**
+ * Writes data from a buffer to the designated block
+ * @returns The number of bytes written, 0 on fail
+ */
 size_t block_store_write(block_store_t *const bs, const size_t block_id, const void *buffer)
 {
 	// NULL checks and verifying block_id is less than the number of block and that block is in use

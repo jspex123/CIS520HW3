@@ -18,12 +18,17 @@ struct block_store {
 
 block_store_t *block_store_create()
 {
+	// allocate memory for the block_store
 	block_store_t* block = malloc(sizeof(block_store_t));
+	// NULL check to make sure malloc was successful
 	if (block == NULL) return NULL;
 
+	// set all the memory in the block to 0s
 	block = memset(block, 0, sizeof(block_store_t));
 
+	// create the bitmap and assign it to the block_store object
 	block->bitmap = bitmap_overlay(BITMAP_SIZE_BITS, block->data[BITMAP_START_BLOCK]);
+	// NULL check for the bitmap creation
 	if (block->bitmap == NULL) {
 		free(block);
 		return NULL;
@@ -31,6 +36,7 @@ block_store_t *block_store_create()
 
 	size_t bitmap_blocks = (BITMAP_SIZE_BYTES + BLOCK_SIZE_BYTES - 1) / BLOCK_SIZE_BYTES;
 
+	// allocates memory for the blocks, if any fail, free the block_store
 	for (size_t i = 0; i < bitmap_blocks; i++){
 		if (!block_store_request(block, BITMAP_START_BLOCK + i)) {
 			bitmap_destroy(block->bitmap);
@@ -119,8 +125,10 @@ void block_store_release(block_store_t *const bs, const size_t block_id)
 
 size_t block_store_get_used_blocks(const block_store_t *const bs)
 {
+	// NULL check for valid block store object
 	if (bs == NULL) return SIZE_MAX;
 
+	// returns the total number of used bits in the bitmap
 	return bitmap_total_set(bs->bitmap);
 }
 
@@ -135,6 +143,7 @@ size_t block_store_get_free_blocks(const block_store_t *const bs)
 
 size_t block_store_get_total_blocks()
 {
+	// returning the number of blocks
 	return BLOCK_STORE_NUM_BLOCKS;
 }
 

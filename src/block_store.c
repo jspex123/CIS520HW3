@@ -180,7 +180,7 @@ size_t block_store_read(const block_store_t *const bs, const size_t block_id, vo
  */
 size_t block_store_write(block_store_t *const bs, const size_t block_id, const void *buffer)
 {
-	// NULL checks and verifying block_id is less than the number of block and that block is in use
+	// NULL checks and verifying block_id is less than the number of block and that block is allocated
 	if (bs == NULL || buffer == NULL) return 0;
 	if (block_id >= BLOCK_STORE_NUM_BLOCKS) return 0;
 	if (!bitmap_test(bs->bitmap, block_id)) return 0;

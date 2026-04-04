@@ -157,10 +157,14 @@ size_t block_store_read(const block_store_t *const bs, const size_t block_id, vo
 
 size_t block_store_write(block_store_t *const bs, const size_t block_id, const void *buffer)
 {
-	UNUSED(bs);
-	UNUSED(block_id);
-	UNUSED(buffer);
-	return 0;
+	// NULL checks and verifying block_id is less than the number of block and that block is in use
+	if (bs == NULL || buffer == NULL) return 0;
+	if (block_id >= BLOCK_STORE_NUM_BLOCKS) return 0;
+	if (!bitmap_test(bs->bitmap, block_id)) return 0;
+
+	// write the buffer to the block
+	memcpy(bs->data[block_id], buffer, BLOCK_SIZE_BYTES);
+	return BLOCK_SIZE_BYTES;
 }
 
 block_store_t *block_store_deserialize(const char *const filename)

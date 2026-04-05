@@ -6,11 +6,9 @@
 #include "block_store.h"
 // include more if you need
 
-
-// You might find this handy. I put it around unused parameters, but you should
-// remove it before you submit. Just allows things to compile initially.
-#define UNUSED(x) (void)(x)
-
+/**
+ * Block store struct
+ */
 struct block_store {
     uint8_t  data[BLOCK_STORE_NUM_BLOCKS][BLOCK_SIZE_BYTES];
     bitmap_t *bitmap;
@@ -127,6 +125,11 @@ bool block_store_request(block_store_t *const bs, const size_t block_id)
 	return bitmap_test(bs->bitmap, block_id);
 }
 
+/**
+ * Frees the specified block
+ * @param bs Pointer to the block store
+ * @param block_id The block identifier to to mark as allocated
+ */
 void block_store_release(block_store_t *const bs, const size_t block_id)
 {
 	if (bs == NULL || block_id >= BLOCK_STORE_NUM_BLOCKS) {
@@ -156,6 +159,11 @@ size_t block_store_get_used_blocks(const block_store_t *const bs)
 	return bitmap_total_set(bs->bitmap);
 }
 
+/**
+ * Counts the number of blocks marked free for use
+ * @param bs Pointer to the block store
+ * @returns Total blocks in use, SIZE_MAX on error
+ */
 size_t block_store_get_free_blocks(const block_store_t *const bs)
 {
 	if (bs == NULL) {
@@ -256,9 +264,32 @@ block_store_t *block_store_deserialize(const char *const filename)
 
 }
 
+/**
+ * Writes the entirety of the BS device to file, overwriting it if it exists - for grads/bonus
+ * @param bs BS device
+ * @param filename The file to write to
+ * @return Number of bytes written, 0 on error
+ */
 size_t block_store_serialize(const block_store_t *const bs, const char *const filename)
 {
-	UNUSED(bs);
-	UNUSED(filename);
-	return 0;
+	if (bs == NULL || filename == NULL) {
+        return 0;
+    }
+
+    FILE *fp = fopen(filename, "wb");
+    if (fp == NULL) {
+        return 0;
+    }
+
+    // write the entire data array
+    size_t bytes_written = fwrite(bs->data, 1, BLOCK_STORE_NUM_BYTES, fp);
+
+    fclose(fp);
+
+    // return number of bytes written, or 0 on error
+    if (bytes_written == BLOCK_STORE_NUM_BYTES) {
+        return bytes_written;
+    } else {
+        return 0;
+    }
 }
